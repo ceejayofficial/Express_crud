@@ -1,0 +1,61 @@
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
+
+const App = () => {
+  const [books, setBooks] = useState([]);
+  const [newBook, setNewBook] = useState({ title: '', author: '' });
+
+  useEffect(() => {
+    // Fetch all books when the component mounts
+    axios.get('http://localhost:3000/books')
+      .then(response => setBooks(response.data))
+      .catch(error => console.error(error));
+  }, []);
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setNewBook(prevState => ({ ...prevState, [name]: value }));
+  };
+
+  const handleAddBook = () => {
+    axios.post('http://localhost:3000/books', newBook)
+      .then(response => {
+        setBooks(prevState => [...prevState, response.data]);
+        setNewBook({ title: '', author: '' });
+      })
+      .catch(error => console.error(error));
+  };
+
+  return (
+    <div>
+      <h1>Book Library</h1>
+      <ul>
+        {books.map(book => (
+          <li key={book._id}>
+            {book.title} by {book.author}
+          </li>
+        ))}
+      </ul>
+      <div>
+        <h2>Add a Book</h2>
+        <input
+          type="text"
+          placeholder="Title"
+          name="title"
+          value={newBook.title}
+          onChange={handleInputChange}
+        />
+        <input
+          type="text"
+          placeholder="Author"
+          name="author"
+          value={newBook.author}
+          onChange={handleInputChange}
+        />
+        <button onClick={handleAddBook}>Add Book</button>
+      </div>
+    </div>
+  );
+};
+
+export default App;
